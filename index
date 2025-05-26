@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmación de Asistencia - Jacqueline</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f0f0f0, #c0c0c0);
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 2rem;
+      margin: 0;
+    }
+    form {
+      background: white;
+      padding: 2rem;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    h2 {
+      color: #b4975a;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .checkbox-group label {
+      font-weight: normal;
+      margin-top: 0.3rem;
+      display: block;
+    }
+    button {
+      margin-top: 1.5rem;
+      background-color: #25D366;
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      width: 100%;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #128C7E;
+    }
+    #mensajeGracias {
+      text-align: center;
+      margin-top: 1rem;
+      color: #444;
+      font-weight: bold;
+    }
+    #qrCode {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    #qrImage {
+      max-width: 200px;
+    }
+    @media (max-width: 600px) {
+      form {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <form onsubmit="enviarFormulario(); return false;">
+    <h2>Confirmación de Asistencia</h2>
+
+    <label for="nombre">Nombre completo:</label>
+    <input type="text" id="nombre" required>
+
+    <label for="asistencia">¿Confirmás tu asistencia?</label>
+    <select id="asistencia" required>
+      <option value="">Seleccionar</option>
+      <option value="Sí">Sí</option>
+      <option value="No">No</option>
+    </select>
+
+    <label>Restricción alimentaria (puede marcar varias):</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="alimentacion" value="Ninguna"> Ninguna</label>
+      <label><input type="checkbox" name="alimentacion" value="SIN TACC"> SIN TACC</label>
+      <label><input type="checkbox" name="alimentacion" value="Vegano"> Vegano</label>
+      <label><input type="checkbox" name="alimentacion" value="Hipertensión"> Hipertensión</label>
+      <label><input type="checkbox" name="alimentacion" value="Diabético"> Diabético</label>
+    </div>
+
+    <button type="submit">Enviar confirmación</button>
+
+    <div id="mensajeGracias"></div>
+    <div id="qrCode">
+      <p>Escaneá este código para enviar el mensaje desde otro dispositivo:</p>
+      <img id="qrImage" src="" alt="QR de WhatsApp">
+    </div>
+  </form>
+
+  <script>
+    function generarID(nombre) {
+      const letras = nombre.replace(/\s/g, '').substring(0, 3).toUpperCase();
+      const aleatorio = Math.random().toString(36).substring(2, 7).toUpperCase();
+      return letras + aleatorio;
+    }
+
+    async function enviarFormulario() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const asistencia = document.getElementById("asistencia").value;
+      const restricciones = Array.from(document.querySelectorAll('input[name="alimentacion"]:checked'))
+                                .map(el => el.value)
+                                .join(", ") || "No especifica";
+      const idUnico = generarID(nombre);
+
+      const mensaje = `Hola, soy ${nombre}. Confirmo asistencia: ${asistencia}. Restricciones alimentarias: ${restricciones}. ID de invitación: ${idUnico}. Evento: Mis 15 Años - Jacqueline`;
+      const telefono = "541124572552";
+      const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+      const data = {
+        nombre: nombre,
+        asistencia: asistencia,
+        restricciones: restricciones,
+        id: idUnico
+      };
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbzrFpG_TmPnPU9eOlGlYsRrmYamogpbg8opvAJYUCaqHr72Glxe-Wnk5tS7wP-K6nuuQw/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        document.getElementById("mensajeGracias").innerHTML = `¡Gracias por confirmar, ${nombre}!<br>Tu código de invitación es: <strong>${idUnico}</strong>`;
+
+        document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+        document.getElementById("qrCode").style.display = "block";
+
+        window.open(url, '_blank');
+      } catch (error) {
+        alert("Hubo un error al enviar los datos. Intentá nuevamente.");
+      }
+    }
+  </script>
+
+</body>
+</html>
