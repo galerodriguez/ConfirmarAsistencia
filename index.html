@@ -6,11 +6,10 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f0f0f0, #c0c0c0);
-      background-attachment: fixed;
-      background-repeat: no-repeat;
+      background: linear-gradient(to bottom right, #e0e0e0, #f8f8f8);
       padding: 2rem;
       margin: 0;
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
     }
     form {
       background: white;
@@ -111,29 +110,21 @@
   </form>
 
   <script>
-    function generarID(nombre) {
-      const letras = nombre.replace(/\s/g, '').substring(0, 3).toUpperCase();
-      const aleatorio = Math.random().toString(36).substring(2, 7).toUpperCase();
-      return letras + aleatorio;
-    }
-
     async function enviarFormulario() {
       const nombre = document.getElementById("nombre").value.trim();
       const asistencia = document.getElementById("asistencia").value;
       const restricciones = Array.from(document.querySelectorAll('input[name="alimentacion"]:checked'))
                                 .map(el => el.value)
                                 .join(", ") || "No especifica";
-      const idUnico = generarID(nombre);
 
-      const mensaje = `Hola, soy ${nombre}. Confirmo asistencia: ${asistencia}. Restricciones alimentarias: ${restricciones}. ID de invitación: ${idUnico}. Evento: Mis 15 Años - Jacqueline`;
+      const mensaje = `Hola, soy ${nombre}. Confirmo asistencia: ${asistencia}. Restricciones alimentarias: ${restricciones}. Evento: Mis 15 Años - Jacqueline`;
       const telefono = "541124572552";
       const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
 
       const data = {
         nombre: nombre,
         asistencia: asistencia,
-        restricciones: restricciones,
-        id: idUnico
+        restricciones: restricciones
       };
 
       try {
@@ -145,12 +136,11 @@
           body: JSON.stringify(data)
         });
 
-        document.getElementById("mensajeGracias").innerHTML = `¡Gracias por confirmar, ${nombre}!<br>Tu código de invitación es: <strong>${idUnico}</strong>`;
-
+        document.getElementById("mensajeGracias").innerHTML = `¡Gracias por confirmar, ${nombre}!`;
         document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
         document.getElementById("qrCode").style.display = "block";
-
         window.open(url, '_blank');
+
       } catch (error) {
         alert("Hubo un error al enviar los datos. Intentá nuevamente.");
       }
